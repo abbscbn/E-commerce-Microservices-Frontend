@@ -67,14 +67,5 @@ src/
 
 ## 🔗 Backend
 Bu frontend uygulaması, Spring Boot ile yazılmış **E-commerce Microservices Backend** projesi ile haberleşmektedir.  
-👉 [Backend Repo](https://github.com/abbscbn/E-commerce-Microservices-Backend) *(linki kendine göre güncelle)*  
-
 ---
 
-## 📸 Ekran Görüntüleri
-*(Buraya ekran görüntüleri ekleyebilirsin – `assets` klasörü açıp README’ye ekle)*
-
----
-
-## 📝 Lisans
-Bu proje kişisel öğrenme ve geliştirme amaçlıdır.
