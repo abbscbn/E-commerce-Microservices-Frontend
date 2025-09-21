@@ -1,69 +1,80 @@
-# React + TypeScript + Vite
+# E-commerce Microservices Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Bu proje, **React + TypeScript** ile geliştirilmiş bir **e-ticaret uygulaması frontend’idir**.  
+Kullanıcılar kayıt olabilir, giriş yapabilir ve sistemde oturum açabilir. Uygulama, state yönetimi için **Redux Toolkit** ve sayfa yönlendirmeleri için **React Router** kullanmaktadır.  
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Kullanılan Teknolojiler
+- **React** (TypeScript ile)  
+- **Redux Toolkit** – state yönetimi  
+- **React Router DOM** – sayfa yönlendirmeleri  
+- **Formik & Yup** – form yönetimi ve validasyon  
+- **Axios** – backend API istekleri  
+- **Bootstrap / MDBootstrap** – UI tasarımı  
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 🔐 Özellikler
+- Kullanıcı **kayıt (register)**  
+- Kullanıcı **giriş (login)**  
+- Form validasyonu (Formik + Yup)  
+- Oturum yönetimi (Redux Toolkit)  
+- Protected Routes (React Router ile)  
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+---
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## 📂 Proje Yapısı (Örnek)
+```
+src/
+ ┣ components/
+ ┃ ┣ Register.tsx
+ ┃ ┣ Login.tsx
+ ┣ form/
+ ┃ ┣ RegisterFormSchemas.ts
+ ┣ store/
+ ┃ ┣ index.ts
+ ┃ ┣ authSlice.ts
+ ┣ pages/
+ ┃ ┣ Home.tsx
+ ┣ App.tsx
+ ┗ main.tsx
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## ⚙️ Kurulum ve Çalıştırma
+1. Repoyu klonla:
+   ```bash
+   git clone https://github.com/abbscbn/E-commerce-Microservices-Frontend.git
+   cd E-commerce-Microservices-Frontend
+   ```
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+2. Bağımlılıkları yükle:
+   ```bash
+   npm install
+   ```
+
+3. Development server’ı çalıştır:
+   ```bash
+   npm run dev
+   ```
+
+4. Uygulamayı aç:  
+   👉 [http://localhost:5173](http://localhost:5173)
+
+---
+
+## 🔗 Backend
+Bu frontend uygulaması, Spring Boot ile yazılmış **E-commerce Microservices Backend** projesi ile haberleşmektedir.  
+👉 [Backend Repo](https://github.com/abbscbn/E-commerce-Microservices-Backend) *(linki kendine göre güncelle)*  
+
+---
+
+## 📸 Ekran Görüntüleri
+*(Buraya ekran görüntüleri ekleyebilirsin – `assets` klasörü açıp README’ye ekle)*
+
+---
+
+## 📝 Lisans
+Bu proje kişisel öğrenme ve geliştirme amaçlıdır.
