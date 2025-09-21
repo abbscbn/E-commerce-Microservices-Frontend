@@ -1,10 +1,11 @@
 import "./App.css";
+import Login from "./companenets/Login";
 import Register from "./companenets/Register";
 
 function App() {
   return (
     <div>
-      <Register />
+      <Login />
     </div>
   );
 }

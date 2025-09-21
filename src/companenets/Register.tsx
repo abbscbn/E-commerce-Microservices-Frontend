@@ -1,5 +1,7 @@
 import { useFormik } from "formik";
 import { registerFormSchemas } from "../form/RegisterFormSchemas";
+import { Snackbar, Alert } from "@mui/material";
+import { useState } from "react";
 
 interface MyFormValues {
   username: string;
@@ -10,6 +12,8 @@ interface MyFormValues {
 }
 
 function Register() {
+  const [open, setOpen] = useState(false);
+
   const { values, errors, touched, handleBlur, handleChange, handleSubmit } =
     useFormik<MyFormValues>({
       initialValues: {
@@ -23,6 +27,7 @@ function Register() {
       // <-- İstersen açabilirsin
       onSubmit: (values) => {
         console.log(values);
+        setOpen(true);
       },
     });
 
@@ -189,6 +194,20 @@ function Register() {
                           </button>
                         </div>
                       </form>
+                      <Snackbar
+                        open={open}
+                        autoHideDuration={3000}
+                        onClose={() => setOpen(false)}
+                        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+                      >
+                        <Alert
+                          onClose={() => setOpen(false)}
+                          severity="success"
+                          sx={{ width: "100%" }}
+                        >
+                          Kayıt başarılı!
+                        </Alert>
+                      </Snackbar>
                     </div>
                     <div className="col-md-10 col-lg-6 col-xl-7 d-flex align-items-center order-1 order-lg-2">
                       <img
