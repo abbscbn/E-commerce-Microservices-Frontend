@@ -45,7 +45,7 @@ function Homepage_Products() {
     },
   ];
   return (
-    <div className="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center p-4">
+    <div className="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center p-5">
       {products.map((product, index) => (
         <div className="col mb-5" key={index}>
           <div className="card h-100">
