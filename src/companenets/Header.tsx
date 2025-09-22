@@ -1,86 +1,164 @@
+import { useState } from "react";
+import AppBar from "@mui/material/AppBar";
+import Toolbar from "@mui/material/Toolbar";
+import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-function Header() {
-  return (
-    <div>
-      <nav className="navbar navbar-expand-lg navbar-light bg-light">
-        <div className="container px-4 px-lg-5">
-          <a className="navbar-brand" href="#!">
-            Start Bootstrap
-          </a>
-          <button
-            className="navbar-toggler"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#navbarSupportedContent"
-            aria-controls="navbarSupportedContent"
-            aria-expanded="false"
-            aria-label="Toggle navigation"
-          >
-            <span className="navbar-toggler-icon" />
-          </button>
-          <div className="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul className="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4 d-flex justify-content-between w-75">
-              <li className="nav-item">
-                <a className="nav-link active" aria-current="page" href="#!">
-                  Home
-                </a>
-              </li>
-              <li className="nav-item">
-                <a className="nav-link" href="#!">
-                  About
-                </a>
-              </li>{" "}
-              <li className="nav-item dropdown">
-                <a
-                  className="nav-link dropdown-toggle"
-                  id="navbarDropdown"
-                  href="#"
-                  role="button"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
-                >
-                  Shop
-                </a>
-                <ul className="dropdown-menu" aria-labelledby="navbarDropdown">
-                  <li>
-                    <a className="dropdown-item" href="#!">
-                      All Products
-                    </a>
-                  </li>
-                  <li>
-                    <hr className="dropdown-divider" />
-                  </li>
-                  <li>
-                    <a className="dropdown-item" href="#!">
-                      Popular Items
-                    </a>
-                  </li>
-                  <li>
-                    <a className="dropdown-item" href="#!">
-                      New Arrivals
-                    </a>
-                  </li>
-                </ul>
-              </li>
-              <div>
-                <Button variant="outlined">Giriş Yap</Button>
-                <Button className="mx-2" variant="outlined">Kayıt Ol</Button>
-              </div>
-            </ul>
+import IconButton from "@mui/material/IconButton";
+import Badge from "@mui/material/Badge";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import MenuIcon from "@mui/icons-material/Menu";
+import Drawer from "@mui/material/Drawer";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemText from "@mui/material/ListItemText";
+import ListItemButton from "@mui/material/ListItemButton";
+import Box from "@mui/material/Box";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme } from "@mui/material/styles";
+import { Link } from "react-router-dom";
+import logo from "../assets/images/coba_logo.png";
 
-            <form className="d-flex">
-              <button className="btn btn-outline-dark" type="submit">
-                <i className="bi-cart-fill me-1" />
-                Sepet
-                <span className="badge bg-dark text-white ms-1 rounded-pill">
-                  0
-                </span>
-              </button>
-            </form>
-          </div>
-        </div>
-      </nav>
-    </div>
+function Header() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const handleDrawerToggle = () => {
+    setDrawerOpen(!drawerOpen);
+  };
+
+  const menuItems = [
+    { label: "ANASAYFA", path: "/" },
+    { label: "HAKKIMIZDA", path: "/about" },
+    { label: "ÜRÜNLER", path: "/shop" },
+  ];
+
+  return (
+    <>
+      <AppBar position="static" color="transparent" elevation={1}>
+        <Toolbar>
+          <img src={logo} height={45} alt="logo" />
+          <Typography variant="h6" sx={{ flexGrow: 1 }}></Typography>
+
+          {/* Desktop Menü */}
+          {!isMobile && (
+            <>
+              {menuItems.map((item) => (
+                <Button
+                  key={item.label}
+                  component={Link}
+                  to={item.path}
+                  color="inherit"
+                >
+                  {item.label}
+                </Button>
+              ))}
+              <Button
+                component={Link}
+                to="/login"
+                color="warning"
+                variant="contained"
+                sx={{
+                  ml: 2,
+                  "&:hover": {
+                    backgroundColor: "#f8a831ff", // hover olduğunda arka plan rengi
+                    color: "#fff", // hover olduğunda yazı rengi
+                  },
+                }}
+              >
+                Giriş Yap
+              </Button>
+              <Button
+                component={Link}
+                to="/register"
+                color="primary"
+                variant="contained"
+                sx={{
+                  ml: 2,
+                  "&:hover": {
+                    backgroundColor: "#79a3e2ff", // hover olduğunda arka plan rengi
+                    color: "#fff", // hover olduğunda yazı rengi
+                  },
+                }}
+              >
+                Kayıt Ol
+              </Button>
+              <IconButton color="inherit" sx={{ ml: 2 }}>
+                <Badge badgeContent={5} color="error">
+                  <ShoppingCartIcon />
+                </Badge>
+              </IconButton>
+            </>
+          )}
+
+          {/* Mobile Menü */}
+          {isMobile && (
+            <>
+              <IconButton color="inherit" onClick={handleDrawerToggle}>
+                <MenuIcon />
+              </IconButton>
+              <IconButton color="inherit">
+                <Badge badgeContent={5} color="error">
+                  <ShoppingCartIcon />
+                </Badge>
+              </IconButton>
+            </>
+          )}
+        </Toolbar>
+      </AppBar>
+
+      {/* Drawer (Mobile Menü) */}
+      <Drawer anchor="right" open={drawerOpen} onClose={handleDrawerToggle}>
+        <Box
+          sx={{ width: 250 }}
+          role="presentation"
+          onClick={handleDrawerToggle}
+        >
+          <List>
+            {menuItems.map((item, index) => (
+              <ListItemButton component={Link} to={item.path} key={index}>
+                <ListItemText primary={item.label} />
+              </ListItemButton>
+            ))}
+            <ListItem>
+              <Button
+                component={Link}
+                to="/login"
+                color="warning"
+                variant="contained"
+                fullWidth
+                sx={{
+                  "&:hover": {
+                    backgroundColor: "#f8a831ff", // hover olduğunda arka plan rengi
+                    color: "#fff", // hover olduğunda yazı rengi
+                  },
+                }}
+              >
+                Giriş Yap
+              </Button>
+            </ListItem>
+            <ListItem>
+              <Button
+                component={Link}
+                to="/register"
+                color="primary"
+                variant="contained"
+                fullWidth
+                sx={{
+                  "&:hover": {
+                    backgroundColor: "#79a3e2ff", // hover olduğunda arka plan rengi
+                    color: "#fff", // hover olduğunda yazı rengi
+                  },
+                }}
+              >
+                Kayıt Ol
+              </Button>
+            </ListItem>
+          </List>
+        </Box>
+      </Drawer>
+    </>
   );
 }
 

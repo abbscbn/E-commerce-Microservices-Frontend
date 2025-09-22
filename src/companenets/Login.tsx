@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
 function Login() {
   const [username, Setusername] = useState<string>("");
@@ -88,7 +88,7 @@ function Login() {
                   </button>
                   <p className="small fw-bold mt-2 pt-1 mb-1">
                     Bir hesabınız yok mu?{" "}
-                    <a href="#!" className="link-danger">
+                    <a href="/register" className="link-danger">
                       Kayıt Ol
                     </a>
                   </p>
