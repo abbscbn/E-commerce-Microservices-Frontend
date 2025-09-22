@@ -1,11 +1,12 @@
 import "./App.css";
-import Login from "./companenets/Login";
-import Register from "./companenets/Register";
+import Header from "./companenets/Header";
+import Routers from "./companenets/Routers";
 
 function App() {
   return (
     <div>
-      <Login />
+      <Header />
+      <Routers />
     </div>
   );
 }
