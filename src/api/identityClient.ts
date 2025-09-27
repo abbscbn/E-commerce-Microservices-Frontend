@@ -1,5 +1,6 @@
-import axios from "axios";
-import type { RootResponse } from "../types/rootResponse";
+import axios, { AxiosError } from "axios";
+import { unwrapResponse } from "../utils/unwrapResponse";
+import type { ApiError } from "../types/error";
 
 const identityClient = axios.create({
   baseURL: "http://localhost:8080/auth",
@@ -9,16 +10,23 @@ const identityClient = axios.create({
 });
 
 // unwrap helper
-function unwrapResponse<T>(res: RootResponse<T>): T {
-  if (!res.data) {
-    throw new Error(res.apiError?.message ?? "Bilinmeyen hata");
-  }
-  return res.data;
-}
 
 identityClient.interceptors.response.use(
-  (response) => unwrapResponse(response.data), // TS artık return tipini T olarak alacak
-  (error) => Promise.reject(error)
+  (response) => unwrapResponse(response.data),
+  (error: AxiosError) => {
+    let apiError: ApiError = { message: "Bilinmeyen hata oluştu" };
+
+    if (error.response?.data && (error.response.data as any).apiError) {
+      apiError = {
+        message: (error.response.data as any).apiError.message,
+        status: error.response.status,
+      };
+    } else if (error.message) {
+      apiError = { message: error.message };
+    }
+
+    return Promise.reject(apiError);
+  }
 );
 
 export default identityClient;

@@ -2,6 +2,9 @@ import { useFormik } from "formik";
 import { registerFormSchemas } from "../form/RegisterFormSchemas";
 import { Snackbar, Alert } from "@mui/material";
 import { useState } from "react";
+import { identityService } from "../services/identityService";
+import type { RegisterRequest } from "../types/identity";
+import { useNavigate } from "react-router-dom";
 
 interface MyFormValues {
   username: string;
@@ -13,23 +16,55 @@ interface MyFormValues {
 
 function Register() {
   const [open, setOpen] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const { values, errors, touched, handleBlur, handleChange, handleSubmit } =
-    useFormik<MyFormValues>({
-      initialValues: {
-        username: "",
-        email: "",
-        password: "",
-        confirmPassword: "",
-        term: false,
-      },
-      validationSchema: registerFormSchemas, // <-- Burada kullan
-      // <-- İstersen açabilirsin
-      onSubmit: (values) => {
-        console.log(values);
+  const navigate = useNavigate();
+
+  const {
+    values,
+    errors,
+    touched,
+    handleBlur,
+    handleChange,
+    handleSubmit,
+    resetForm,
+  } = useFormik<MyFormValues>({
+    initialValues: {
+      username: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      term: false,
+    },
+    validationSchema: registerFormSchemas, // <-- Burada kullan
+    // <-- İstersen açabilirsin
+    onSubmit: async (values) => {
+      try {
+        // ConfirmPassword ve term backend’e gitmeyecek
+        const payload: RegisterRequest = {
+          username: values.username,
+          email: values.email,
+          password: values.password,
+        };
+
+        const res = await identityService.register(payload);
+
+        console.log(res);
+
+        setErrorMsg(null);
         setOpen(true);
-      },
-    });
+        resetForm();
+
+        setTimeout(() => {
+          navigate("/login");
+        }, 1500);
+      } catch (err: any) {
+        // unwrapResponse sayesinde backend'den gelen hata throw ediliyor
+        // burada err zaten ApiError tipinde
+        setErrorMsg(err.message);
+      }
+    },
+  });
 
   return (
     <div>
@@ -194,6 +229,7 @@ function Register() {
                           </button>
                         </div>
                       </form>
+                      {/* Başarılı */}
                       <Snackbar
                         open={open}
                         autoHideDuration={3000}
@@ -206,6 +242,22 @@ function Register() {
                           sx={{ width: "100%" }}
                         >
                           Kayıt başarılı!
+                        </Alert>
+                      </Snackbar>
+
+                      {/* Hata */}
+                      <Snackbar
+                        open={!!errorMsg}
+                        autoHideDuration={4000}
+                        onClose={() => setErrorMsg(null)}
+                        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+                      >
+                        <Alert
+                          onClose={() => setErrorMsg(null)}
+                          severity="error"
+                          sx={{ width: "100%" }}
+                        >
+                          {errorMsg}
                         </Alert>
                       </Snackbar>
                     </div>

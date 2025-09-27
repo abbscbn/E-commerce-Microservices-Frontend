@@ -1,13 +1,6 @@
-import axios from "axios";
-import type { RootResponse } from "../types/rootResponse";
-
-// unwrap helper
-function unwrapResponse<T>(res: RootResponse<T>): T {
-  if (!res.data) {
-    throw new Error(res.apiError?.message ?? "Bilinmeyen hata");
-  }
-  return res.data;
-}
+import axios, { AxiosError } from "axios";
+import { unwrapResponse } from "../utils/unwrapResponse";
+import type { ApiError } from "../types/error";
 
 export const createApiClient = (baseURL: string) => {
   const client = axios.create({
@@ -29,8 +22,21 @@ export const createApiClient = (baseURL: string) => {
 
   // RESPONSE INTERCEPTOR: RootResponse unwrap
   client.interceptors.response.use(
-    (response) => unwrapResponse(response.data), // TS artık return tipini T olarak alacak
-    (error) => Promise.reject(error)
+    (response) => unwrapResponse(response.data),
+    (error: AxiosError) => {
+      let apiError: ApiError = { message: "Bilinmeyen hata oluştu" };
+
+      if (error.response?.data && (error.response.data as any).apiError) {
+        apiError = {
+          message: (error.response.data as any).apiError.message,
+          status: error.response.status,
+        };
+      } else if (error.message) {
+        apiError = { message: error.message };
+      }
+
+      return Promise.reject(apiError);
+    }
   );
 
   return client;

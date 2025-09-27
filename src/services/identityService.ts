@@ -10,7 +10,7 @@ export const identityService = {
   async register(data: RegisterRequest): Promise<RegisterResponse> {
     return identityClient.post("/register", data);
   },
-
+  //LoginResponse
   async login(data: LoginRequest): Promise<LoginResponse> {
     return identityClient.post("/login", data);
   },

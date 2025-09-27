@@ -7,5 +7,5 @@ export interface RootResponse<T> {
   apiError?: {
     message: any;
   } | null;
-  data?: T | null;
+  data: T | null;
 }
