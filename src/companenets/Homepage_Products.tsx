@@ -82,8 +82,11 @@ function Homepage_Products() {
             </div>
             <div className="card-footer p-4 pt-0 border-top-0 bg-transparent">
               <div className="text-center">
-                <a className="btn btn-outline-dark mt-auto" href="#">
-                  {product.sale ? "Add to cart" : "View options"}
+                <a
+                  className="btn btn-outline-dark mt-auto"
+                  href="product-details"
+                >
+                  {product.sale ? "Detaya Git" : "Detaya Git"}
                 </a>
               </div>
             </div>

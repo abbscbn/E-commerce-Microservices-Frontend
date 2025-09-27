@@ -1,4 +1,3 @@
-import React from "react";
 import pic from "../assets/images/subheader.avif";
 import TextType from "../components/TextType";
 
@@ -9,7 +8,7 @@ function SubHeader() {
         style={{
           backgroundImage: `url(${pic})`,
           backgroundSize: "cover",
-          backgroundPosition: "center bottom",
+          backgroundPosition: "center",
         }}
         className="py-5"
       >
