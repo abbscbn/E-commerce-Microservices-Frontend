@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { identityService } from "../services/identityService";
 import type { LoginRequest } from "../types/identity";
+import { useAppDispatch } from "../app/hooks";
+import { setUser } from "../slices/authSlice";
 
 function Login() {
   const [username, setUsername] = useState<string>("");
@@ -10,6 +12,7 @@ function Login() {
   const [loading, setLoading] = useState<boolean>(false);
 
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
 
   const handleLogin = async () => {
     // basic validation
@@ -37,13 +40,14 @@ function Login() {
       const payload: LoginRequest = { username, password };
       const data = await identityService.login(payload);
 
-      console.log(data.token);
-
       // token’ı localStorage’a yaz
       localStorage.setItem("token", data.token);
 
+      // redux state'e ekle
+      dispatch(setUser(data));
+
       // yönlendir
-      // navigate("/"); // örnek bir protected sayfa
+      navigate("/");
     } catch (err: any) {
       console.log(err);
       setErrorMsg(

@@ -17,12 +17,36 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
 import { Link } from "react-router-dom";
 import logo from "../assets/images/coba_logo.png";
+import { useAppSelector } from "../app/hooks"; // bizim typed hook
+import { useAppDispatch } from "../app/hooks";
+import { clearUser } from "../slices/authSlice";
+import { useNavigate } from "react-router-dom";
+import { identityService } from "../services/identityService";
 
 function Header() {
+  const { user, isAuthenticated } = useAppSelector((state) => state.auth);
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const handleLogout = async () => {
+    const token = localStorage.getItem("token");
+    try {
+      if (token) {
+        const res = await identityService.logout(token);
+        console.log(res);
+      }
+    } catch (err) {
+      console.error("Logout API hatası:", err);
+    } finally {
+      localStorage.removeItem("token");
+      dispatch(clearUser());
+      navigate("/login");
+    }
+  };
 
   const handleDrawerToggle = () => {
     setDrawerOpen(!drawerOpen);
@@ -54,36 +78,52 @@ function Header() {
                   {item.label}
                 </Button>
               ))}
-              <Button
-                component={Link}
-                to="/login"
-                color="warning"
-                variant="contained"
-                sx={{
-                  ml: 2,
-                  "&:hover": {
-                    backgroundColor: "#f8a831ff", // hover olduğunda arka plan rengi
-                    color: "#fff", // hover olduğunda yazı rengi
-                  },
-                }}
-              >
-                Giriş Yap
-              </Button>
-              <Button
-                component={Link}
-                to="/register"
-                color="primary"
-                variant="contained"
-                sx={{
-                  ml: 2,
-                  "&:hover": {
-                    backgroundColor: "#79a3e2ff", // hover olduğunda arka plan rengi
-                    color: "#fff", // hover olduğunda yazı rengi
-                  },
-                }}
-              >
-                Kayıt Ol
-              </Button>
+              {!isAuthenticated ? (
+                <>
+                  <Button
+                    component={Link}
+                    to="/login"
+                    color="warning"
+                    variant="contained"
+                    sx={{
+                      ml: 2,
+                      "&:hover": {
+                        backgroundColor: "#f8a831ff",
+                        color: "#fff",
+                      },
+                    }}
+                  >
+                    Giriş Yap
+                  </Button>
+                  <Button
+                    component={Link}
+                    to="/register"
+                    color="primary"
+                    variant="contained"
+                    sx={{
+                      ml: 2,
+                      "&:hover": {
+                        backgroundColor: "#79a3e2ff",
+                        color: "#fff",
+                      },
+                    }}
+                  >
+                    Kayıt Ol
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Typography sx={{ ml: 2 }}>{user?.username}</Typography>
+                  <Button
+                    color="error"
+                    variant="outlined"
+                    sx={{ ml: 2 }}
+                    onClick={handleLogout}
+                  >
+                    Çıkış Yap
+                  </Button>
+                </>
+              )}
               <IconButton color="inherit" sx={{ ml: 2 }}>
                 <Badge badgeContent={5} color="error">
                   <ShoppingCartIcon />
@@ -121,40 +161,69 @@ function Header() {
                 <ListItemText primary={item.label} />
               </ListItemButton>
             ))}
-            <ListItem>
-              <Button
-                component={Link}
-                to="/login"
-                color="warning"
-                variant="contained"
-                fullWidth
-                sx={{
-                  "&:hover": {
-                    backgroundColor: "#f8a831ff", // hover olduğunda arka plan rengi
-                    color: "#fff", // hover olduğunda yazı rengi
-                  },
-                }}
-              >
-                Giriş Yap
-              </Button>
-            </ListItem>
-            <ListItem>
-              <Button
-                component={Link}
-                to="/register"
-                color="primary"
-                variant="contained"
-                fullWidth
-                sx={{
-                  "&:hover": {
-                    backgroundColor: "#79a3e2ff", // hover olduğunda arka plan rengi
-                    color: "#fff", // hover olduğunda yazı rengi
-                  },
-                }}
-              >
-                Kayıt Ol
-              </Button>
-            </ListItem>
+
+            {!isAuthenticated ? (
+              <>
+                <ListItem>
+                  <Button
+                    component={Link}
+                    to="/login"
+                    color="warning"
+                    variant="contained"
+                    fullWidth
+                    sx={{
+                      "&:hover": {
+                        backgroundColor: "#f8a831ff",
+                        color: "#fff",
+                      },
+                    }}
+                  >
+                    Giriş Yap
+                  </Button>
+                </ListItem>
+                <ListItem>
+                  <Button
+                    component={Link}
+                    to="/register"
+                    color="primary"
+                    variant="contained"
+                    fullWidth
+                    sx={{
+                      "&:hover": {
+                        backgroundColor: "#79a3e2ff",
+                        color: "#fff",
+                      },
+                    }}
+                  >
+                    Kayıt Ol
+                  </Button>
+                </ListItem>
+              </>
+            ) : (
+              <>
+                <ListItem>
+                  <Typography variant="subtitle1" sx={{ ml: 1 }}>
+                    {user?.username}
+                  </Typography>
+                </ListItem>
+                <ListItem>
+                  <Button
+                    color="error"
+                    variant="outlined"
+                    fullWidth
+                    onClick={handleLogout}
+                    sx={{
+                      "&:hover": {
+                        backgroundColor: "#ff4d4d",
+                        color: "#fff",
+                      },
+                    }}
+                  >
+                    Çıkış Yap
+                  </Button>
+                </ListItem>
+              </>
+            )}
           </List>
         </Box>
       </Drawer>

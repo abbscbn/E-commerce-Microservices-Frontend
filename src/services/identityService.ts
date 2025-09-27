@@ -15,7 +15,15 @@ export const identityService = {
     return identityClient.post("/login", data);
   },
 
-  async logout(data: string): Promise<string> {
-    return identityClient.post("/logout", data);
+  async logout(token: string): Promise<string> {
+    return identityClient.post(
+      "/logout",
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
   },
 };
