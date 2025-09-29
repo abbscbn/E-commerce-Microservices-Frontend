@@ -194,20 +194,17 @@ function Register() {
                           </div>
                         </div>
                         <div className="form-check d-flex justify-content-center mb-5 flex-column">
-                          <div className="d-flex justify-content-center">
+                          <div className="form-check text-center">
                             <input
-                              className="form-check-input me-2"
+                              className="form-check-input"
                               type="checkbox"
                               id="term"
-                              name="term" // <-- önemli! Formik name eşleşmesi için
-                              checked={values.term} // <-- checkbox için checked kullanılmalı
+                              name="term"
+                              checked={values.term}
                               onChange={handleChange}
                               onBlur={handleBlur}
                             />
-                            <label
-                              className="form-check-label"
-                              htmlFor="form2Example3"
-                            >
+                            <label className="form-check-label" htmlFor="term">
                               Hizmet şartlarını kabul ediyorum
                             </label>
                           </div>

@@ -36,7 +36,7 @@ function Header() {
     const token = localStorage.getItem("token");
     try {
       if (token) {
-        const res = await identityService.logout(token);
+        const res = await identityService.logout();
         console.log(res);
       }
     } catch (err) {

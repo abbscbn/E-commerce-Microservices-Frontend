@@ -15,7 +15,14 @@ export const identityService = {
     return identityClient.post("/login", data);
   },
 
-  async logout(token: string): Promise<string> {
+  async adminLogin(data: LoginRequest): Promise<LoginResponse> {
+    return identityClient.post("/admin", data);
+  },
+
+  async logout(): Promise<string> {
+
+    const token = localStorage.getItem("token");
+    
     return identityClient.post(
       "/logout",
       {},

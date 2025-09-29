@@ -80,7 +80,7 @@ function Login() {
               >
                 {/* Username input */}
                 <div className="form-outline mb-4">
-                  <label className="form-label" htmlFor="usernameInput">
+                  <label className="form-label fw-bold" htmlFor="usernameInput">
                     Kullanıcı Adı
                   </label>
                   <input
@@ -95,7 +95,7 @@ function Login() {
 
                 {/* Password input */}
                 <div className="form-outline mb-3">
-                  <label className="form-label" htmlFor="passwordInput">
+                  <label className="form-label fw-bold" htmlFor="passwordInput">
                     Şifre
                   </label>
                   <input
