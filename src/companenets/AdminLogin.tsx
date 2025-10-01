@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import adminPic from "../assets/images/admin.png";
 import { identityService } from "../services/identityService";
@@ -53,6 +53,7 @@ function AdminLogin() {
     setLoading(true);
     try {
       const res = await identityService.adminLogin(payload);
+      localStorage.setItem("token", res.token);
       dispatch(setUser(res));
       console.log(res);
       setOpen(true);

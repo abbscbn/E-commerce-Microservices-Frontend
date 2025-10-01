@@ -25,6 +25,10 @@ import { identityService } from "../services/identityService";
 
 function Header() {
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
+  const { basket } = useAppSelector((state) => state.basket);
+  const totalQuantity = basket
+    ? basket.items.reduce((sum, item) => sum + item.quantity, 0)
+    : 0;
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const theme = useTheme();
@@ -125,7 +129,7 @@ function Header() {
                 </>
               )}
               <IconButton color="inherit" sx={{ ml: 2 }}>
-                <Badge badgeContent={5} color="error">
+                <Badge badgeContent={totalQuantity} color="error">
                   <ShoppingCartIcon />
                 </Badge>
               </IconButton>
@@ -139,7 +143,7 @@ function Header() {
                 <MenuIcon />
               </IconButton>
               <IconButton color="inherit">
-                <Badge badgeContent={5} color="error">
+                <Badge badgeContent={totalQuantity} color="error">
                   <ShoppingCartIcon />
                 </Badge>
               </IconButton>

@@ -1,5 +1,6 @@
-import { configureStore } from "@reduxjs/toolkit";
+import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import authReducer from "../slices/authSlice";
+import basketReducer from "../slices/basketSlice";
 
 import {
   persistStore,
@@ -13,17 +14,25 @@ import {
 } from "redux-persist";
 import storage from "redux-persist/lib/storage"; // localStorage kullanır
 
+// rootReducer ile combine
+const rootReducer = combineReducers({
+  auth: authReducer,
+  basket: basketReducer,
+});
+
+// persist config
 const persistConfig = {
   key: "root",
   storage,
+  // opsiyonel: sadece auth ve basket persist edilecek
+  whitelist: ["auth", "basket"],
 };
 
-const persistedReducer = persistReducer(persistConfig, authReducer);
+// persist edilmiş reducer
+const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 export const store = configureStore({
-  reducer: {
-    auth: persistedReducer,
-  },
+  reducer: persistedReducer,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {

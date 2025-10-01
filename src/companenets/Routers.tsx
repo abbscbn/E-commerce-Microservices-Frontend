@@ -5,8 +5,11 @@ import LoginPage from "./LoginPage";
 import RegisterPage from "./RegisterPage";
 import Product_Details_Page from "./Product_Details_Page";
 import AdminLogin from "./AdminLogin";
-import AdminDashboard from "./AdminDashboard";
 import PrivateRoute from "./PrivateRoute";
+import AdminLayout from "./admin/AdminLayout";
+import DashboardHome from "../pages/admin/DashboardHome";
+import ProductList from "../pages/admin/ProductList";
+import ProductFormWrapper from "../pages/admin/ProductFormWrapper";
 
 function Routers() {
   return (
@@ -14,14 +17,20 @@ function Routers() {
       <Routes>
         <Route path="/" element={<Homepage />} />
         <Route path="/admin" element={<AdminLogin />} />
+        {/* Admin Panel Routing */}
         <Route
           path="/admin-dashboard"
           element={
             <PrivateRoute role="ADMIN">
-              <AdminDashboard />
+              <AdminLayout />
             </PrivateRoute>
           }
-        />
+        >
+          <Route index element={<DashboardHome />} />
+          <Route path="products" element={<ProductList />} />
+          <Route path="products/new" element={<ProductFormWrapper />} />
+          <Route path="products/edit/:id" element={<ProductFormWrapper />} />
+        </Route>
 
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
