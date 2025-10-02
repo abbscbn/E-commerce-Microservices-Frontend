@@ -3,16 +3,21 @@ import { useLocation, Link } from "react-router-dom";
 import { productService } from "../services/productService";
 import type { ResponseProduct } from "../types/product";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
-import { addItem } from "../slices/basketSlice";
+import { addItem, setBasket } from "../slices/basketSlice";
+import { Snackbar, Alert } from "@mui/material"; // MUI snackbar
+import { orderBasketService } from "../services/orderBasketService";
 
 function Product_Details() {
   const dispatch = useAppDispatch();
+  const { user } = useAppSelector((state) => state.auth);
   const { basket } = useAppSelector((state) => state.basket);
 
   const [product, setProduct] = useState<ResponseProduct | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<ResponseProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState<number>(1);
+
+  const [openSnackbar, setOpenSnackbar] = useState(false); // snackbar state
 
   const { search } = useLocation();
   const queryParams = new URLSearchParams(search);
@@ -29,8 +34,12 @@ function Product_Details() {
         setProduct(data);
 
         // Related Products: rastgele 4 ürün
-        const allProducts = await productService.getAllProducts();
-        const filtered = allProducts
+
+        const res: any = await productService.getAllProductsWithPageable(0, 8);
+
+        const pageableAllProducts: ResponseProduct[] = res.content;
+
+        const filtered = pageableAllProducts
           .filter((p) => p.id !== Number(productId))
           .sort(() => 0.5 - Math.random())
           .slice(0, 4);
@@ -44,27 +53,70 @@ function Product_Details() {
     fetchProduct();
   }, [productId]);
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!product) return;
     if (quantity <= 0 || Number.isNaN(quantity)) {
       alert("Miktar 0'dan büyük olmalıdır");
       return;
     }
 
-    // Redux sepetine ekle
+    try {
+      let updatedBasket;
 
-    dispatch(
-      addItem({
-        id: Date.now(), // geçici id, backend sonrası real id ile değişecek
-        productId: product.id,
-        quantity,
-      })
-    );
+      if (!basket || !basket.items || basket.items.length === 0) {
+        // ✅ İlk ürün ekleniyor → saveBasket
+        const newBasket = {
+          // backend ignore edecek
+          userId: user?.id, // buraya auth.user.id koyabilirsin
+          items: [
+            {
+              // backend otomatik verecek
+              productId: product.id,
+              quantity,
+            },
+          ],
+        };
+        updatedBasket = await orderBasketService.saveBasket(newBasket);
+      } else {
+        // ✅ Zaten sepet var → updateBasket
+        const existingItems = basket.items.map((i) => ({ ...i })); // <-- deep copy
+
+        const itemIndex = existingItems.findIndex(
+          (i) => i.productId === product.id
+        );
+
+        if (itemIndex > -1) {
+          // ürün zaten sepette → miktarı artır
+          existingItems[itemIndex] = {
+            ...existingItems[itemIndex],
+            quantity: existingItems[itemIndex].quantity + quantity,
+          };
+        } else {
+          // ürün yeni → pushla
+          existingItems.push({
+            productId: product.id,
+            quantity,
+          });
+        }
+
+        const newBasket = {
+          ...basket, // eski basket’in shallow copy’si
+          items: existingItems,
+        };
+
+        updatedBasket = await orderBasketService.updateBasket(newBasket);
+      }
+      console.log(updatedBasket);
+      // ✅ Redux’a güncel sepeti yaz
+      dispatch(setBasket(updatedBasket));
+      console.log("son nokta");
+      setQuantity(1);
+      setOpenSnackbar(true);
+    } catch (err) {
+      console.error("Sepet güncellenemedi:", err);
+      alert("Sepet güncellenemedi");
+    }
   };
-
-  // Sepetteki aynı ürün miktarı
-  const existingQuantity =
-    basket?.items.find((i) => i.productId === product?.id)?.quantity || 0;
 
   if (loading) return <div className="text-center p-5">Yükleniyor...</div>;
   if (!product) return <div className="text-center p-5">Ürün bulunamadı</div>;
@@ -124,7 +176,7 @@ function Product_Details() {
                   disabled={product.stock <= 0}
                 >
                   <i className="bi-cart-fill me-1" />
-                  Sepete Ekle 
+                  Sepete Ekle
                 </button>
               </div>
             </div>
@@ -175,6 +227,22 @@ function Product_Details() {
           </div>
         </section>
       )}
+
+      {/* ✅ Snackbar */}
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={2000}
+        onClose={() => setOpenSnackbar(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setOpenSnackbar(false)}
+          severity="success"
+          sx={{ width: "100%" }}
+        >
+          Ürün sepete eklendi!
+        </Alert>
+      </Snackbar>
     </>
   );
 }

@@ -1,4 +1,4 @@
-import { createSlice} from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit"; // <--- type-only import
 import type { orderBasketItem, orderBasket } from "../types/orderBasket";
 
@@ -16,7 +16,7 @@ const basketSlice = createSlice({
   name: "basket",
   initialState,
   reducers: {
-    setBasket: (state, action: PayloadAction<orderBasket>) => {
+    setBasket: (state, action: PayloadAction<orderBasket | null>) => {
       state.basket = action.payload;
     },
     clearBasket: (state) => {

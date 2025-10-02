@@ -11,7 +11,7 @@ function PrivateRoute({ children, role }: PrivateRouteProps) {
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
 
   if (!isAuthenticated) {
-    return <Navigate to="/admin" replace />;
+    return <Navigate to="/" replace />;
   }
 
   if (role && !user?.roles?.includes(role)) {

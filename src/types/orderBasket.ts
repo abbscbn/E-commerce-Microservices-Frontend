@@ -1,10 +1,10 @@
 export interface orderBasketItem {
-  id: number;
+  id?: number;
   productId: number;
   quantity: number;
 }
 export interface orderBasket {
-  id: number;
-  userId: number;
+  id?: number;
+  userId: number | undefined;
   items: orderBasketItem[];
 }

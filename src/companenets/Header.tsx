@@ -22,13 +22,12 @@ import { useAppDispatch } from "../app/hooks";
 import { clearUser } from "../slices/authSlice";
 import { useNavigate } from "react-router-dom";
 import { identityService } from "../services/identityService";
+import { clearBasket } from "../slices/basketSlice";
 
 function Header() {
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   const { basket } = useAppSelector((state) => state.basket);
-  const totalQuantity = basket
-    ? basket.items.reduce((sum, item) => sum + item.quantity, 0)
-    : 0;
+  const total = basket?.items.length || 0;
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const theme = useTheme();
@@ -46,8 +45,14 @@ function Header() {
     } catch (err) {
       console.error("Logout API hatası:", err);
     } finally {
+      // ✅ localStorage temizle
       localStorage.removeItem("token");
+      localStorage.removeItem("persist:root"); // redux-persist cache'i de sil
+
+      // ✅ redux state sıfırla
       dispatch(clearUser());
+      dispatch(clearBasket());
+
       navigate("/login");
     }
   };
@@ -129,7 +134,7 @@ function Header() {
                 </>
               )}
               <IconButton color="inherit" sx={{ ml: 2 }}>
-                <Badge badgeContent={totalQuantity} color="error">
+                <Badge badgeContent={total} color="error">
                   <ShoppingCartIcon />
                 </Badge>
               </IconButton>
@@ -143,7 +148,7 @@ function Header() {
                 <MenuIcon />
               </IconButton>
               <IconButton color="inherit">
-                <Badge badgeContent={totalQuantity} color="error">
+                <Badge badgeContent={total} color="error">
                   <ShoppingCartIcon />
                 </Badge>
               </IconButton>

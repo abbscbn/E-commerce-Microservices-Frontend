@@ -4,6 +4,8 @@ import { identityService } from "../services/identityService";
 import type { LoginRequest } from "../types/identity";
 import { useAppDispatch } from "../app/hooks";
 import { setUser } from "../slices/authSlice";
+import { setBasket } from "../slices/basketSlice";
+import { orderBasketService } from "../services/orderBasketService";
 
 function Login() {
   const [username, setUsername] = useState<string>("");
@@ -45,6 +47,17 @@ function Login() {
 
       // redux state'e ekle
       dispatch(setUser(data));
+
+      // ✅ Kullanıcının sepetini getir
+      try {
+        const basket = await orderBasketService.getBasketByUserId(data.id);
+        if (basket) {
+          dispatch(setBasket(basket));
+        }
+      } catch (basketErr) {
+        console.log(basketErr);
+        dispatch(setBasket(null));
+      }
 
       // yönlendir
       navigate("/");

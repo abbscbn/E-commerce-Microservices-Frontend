@@ -1,8 +1,26 @@
 import React from "react";
 import { Outlet, Link } from "react-router-dom";
 import adminPic from "../../assets/images/profil.jpg";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { clearUser, setUser } from "../../slices/authSlice";
+import { clearBasket } from "../../slices/basketSlice";
 
 function AdminLayout() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    // Token / user bilgisini sil
+    localStorage.removeItem("token");
+    sessionStorage.removeItem("token");
+
+    // Redux state sıfırla
+    dispatch(clearUser());
+    dispatch(clearBasket());
+
+    // Login sayfasına yönlendir
+  };
   return (
     <div id="wrapper">
       {/* Sidebar */}
@@ -68,9 +86,10 @@ function AdminLayout() {
                     Ayarlar
                   </a>
                   <div className="dropdown-divider" />
-                  <a className="dropdown-item" href="#">
+                  <button className="dropdown-item" onClick={handleLogout}>
+                    <i className="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400" />
                     Çıkış Yap
-                  </a>
+                  </button>
                 </div>
               </li>
             </ul>
