@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import {
   Box,
   Typography,
@@ -7,19 +8,33 @@ import {
   CardMedia,
   IconButton,
   Button,
-  Stack,
+  Snackbar,
+  Alert,
+  Paper,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useAppSelector, useAppDispatch } from "../app/hooks";
-import { removeItem, updateItemQuantity } from "../slices/basketSlice";
+import {
+  clearBasket,
+  removeItem,
+  updateItemQuantity,
+} from "../slices/basketSlice";
 import { useNavigate } from "react-router-dom";
 import Header from "./Header";
 import { orderBasketService } from "../services/orderBasketService";
+import { orderService } from "../services/orderService";
 
 function BasketPage() {
   const { basket } = useAppSelector((state) => state.basket);
+  const { user } = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const [issuccess, setIssucces] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<
+    "success" | "error" | "warning" | "info"
+  >("success");
 
   // 🔴 Sepetten ürün silme
   const handleRemoveItem = async (productId: number) => {
@@ -58,26 +73,126 @@ function BasketPage() {
     }
   };
 
-  if (!basket || basket.items.length === 0) {
-    return (
-      <Box textAlign="center" mt={5}>
-        <Typography variant="h5">Sepetiniz boş</Typography>
-        <Button
-          variant="contained"
-          color="primary"
-          sx={{ mt: 2 }}
-          onClick={() => navigate("/shop")}
-        >
-          Alışverişe Başla
-        </Button>
-      </Box>
-    );
-  }
+  // 🟣 Sipariş oluşturma
+  const handleCreateOrder = async () => {
+    if (!basket || !user) return;
+    try {
+      const orderItems = basket.items.map((i) => ({
+        productId: i.productId,
+        quantity: i.quantity,
+        price: i.price,
+      }));
 
-  const totalPrice = basket.items.reduce(
+      // 1) Sipariş oluştur
+      const createdOrder = await orderService.createOrder(user.id, orderItems);
+
+      setSnackbarMessage("Siparişiniz işleniyor...");
+      setSnackbarSeverity("info");
+      setSnackbarOpen(true);
+
+      // 2) Siparişin tamamlanmasını bekle (polling mekanizması)
+      const checkOrderStatus = async (orderId: number, retries = 10) => {
+        for (let i = 0; i < retries; i++) {
+          await new Promise((res) => setTimeout(res, 3000)); // 3 saniye bekle
+          const orders = await orderService.getOrderByUserId(user.id);
+
+          const currentOrder = orders.find((o) => o.id === orderId);
+          console.log(currentOrder);
+
+          if (!currentOrder) return;
+
+          if (currentOrder.status === "CONFIRMED") {
+            setSnackbarMessage("Siparişiniz başarıyla tamamlandı 🎉");
+
+            setSnackbarSeverity("success");
+            setSnackbarOpen(true);
+
+            dispatch(clearBasket());
+
+            await orderBasketService.deleteBasketByUserId(user.id);
+
+            setIssucces(true);
+
+            return;
+          }
+
+          if (currentOrder.status === "CANCELLED") {
+            let reasons = "Sipariş başarısız oldu.";
+            if (currentOrder.failedMessages?.length) {
+              reasons = currentOrder.failedMessages
+                .map((fm) => fm.message)
+                .join(", ");
+            }
+
+            setSnackbarMessage(reasons);
+            setSnackbarSeverity("error");
+            setSnackbarOpen(true);
+            return;
+          }
+        }
+
+        // timeout olursa
+        setSnackbarMessage(
+          "Sipariş durumu doğrulanamadı. Lütfen daha sonra kontrol edin."
+        );
+        setSnackbarSeverity("warning");
+        setSnackbarOpen(true);
+      };
+
+      checkOrderStatus(createdOrder.id);
+    } catch (err) {
+      console.error("Sipariş oluşturma hatası:", err);
+      setSnackbarMessage("Sipariş oluşturulamadı. Lütfen tekrar deneyin.");
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+    }
+  };
+
+  const totalPrice = basket?.items.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
   );
+
+  if (issuccess) {
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="100vh"
+        bgcolor="#f5f9f6"
+      >
+        <Paper
+          elevation={3}
+          sx={{
+            p: 5,
+            borderRadius: 4,
+            textAlign: "center",
+            maxWidth: 500,
+          }}
+        >
+          <CheckCircleIcon
+            sx={{ fontSize: 80, color: "success.main", mb: 2 }}
+          />
+          <Typography variant="h4" gutterBottom color="success.main">
+            Siparişiniz Başarılı! 🎉
+          </Typography>
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+            Siparişiniz başarıyla alınmıştır. En kısa sürede hazırlanıp size
+            ulaştırılacaktır.
+          </Typography>
+          <Button
+            variant="contained"
+            color="success"
+            onClick={() => navigate("/")}
+            sx={{ borderRadius: 2, px: 4 }}
+          >
+            Alışverişe Devam Et
+          </Button>
+        </Paper>
+      </Box>
+    );
+  }
 
   return (
     <div>
@@ -87,51 +202,39 @@ function BasketPage() {
           Sepetim
         </Typography>
 
-        {basket.items.map((item) => (
+        {basket?.items.map((item) => (
           <Card
             key={item.productId}
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              mb: 2,
-              p: 2,
-            }}
+            sx={{ display: "flex", alignItems: "center", mb: 2 }}
           >
-            {/* Ürün görseli */}
             <CardMedia
               component="img"
-              sx={{ width: 100, borderRadius: 2 }}
+              sx={{ width: 120 }}
               image={item.productImgUrl || "/placeholder.png"}
               alt={item.name}
             />
-
-            {/* Ürün bilgileri */}
-            <CardContent sx={{ flex: 1, ml: 2 }}>
+            <CardContent sx={{ flex: 1 }}>
               <Typography variant="h6">{item.name}</Typography>
               <Typography variant="body2" color="text.secondary">
-                Fiyat: <b>{item.price} ₺</b>
+                {item.price} ₺ x {item.quantity}
               </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Seçilen Miktar: <b>{item.quantity}</b>
-              </Typography>
-
-              {/* Miktar butonları */}
-              <Stack direction="row" spacing={1} mt={1}>
+              {/* Miktar arttır/azalt butonları */}
+              <Box mt={1}>
                 <Button
                   size="small"
-                  variant="contained"
+                  variant="outlined"
                   color="error"
                   onClick={() =>
                     handleUpdateQuantity(item.productId, item.quantity - 1)
                   }
                   disabled={item.quantity <= 1}
+                  sx={{ mr: 1 }}
                 >
                   -
                 </Button>
                 <Button
                   size="small"
-                  variant="contained"
+                  variant="outlined"
                   color="success"
                   onClick={() =>
                     handleUpdateQuantity(item.productId, item.quantity + 1)
@@ -139,10 +242,8 @@ function BasketPage() {
                 >
                   +
                 </Button>
-              </Stack>
+              </Box>
             </CardContent>
-
-            {/* Silme butonu */}
             <IconButton
               color="error"
               onClick={() => handleRemoveItem(item.productId)}
@@ -152,13 +253,32 @@ function BasketPage() {
           </Card>
         ))}
 
-        {/* Toplam fiyat */}
         <Box mt={3} textAlign="right">
           <Typography variant="h6">Toplam: {totalPrice} ₺</Typography>
-          <Button variant="contained" color="success" sx={{ mt: 2 }}>
+          <Button
+            variant="contained"
+            color="success"
+            sx={{ mt: 2 }}
+            onClick={handleCreateOrder}
+          >
             Satın Al
           </Button>
         </Box>
+
+        {/* Snackbar ile kullanıcıya bilgi göster */}
+        <Snackbar
+          open={snackbarOpen}
+          autoHideDuration={4000}
+          onClose={() => setSnackbarOpen(false)}
+        >
+          <Alert
+            onClose={() => setSnackbarOpen(false)}
+            severity={snackbarSeverity}
+            sx={{ width: "100%" }}
+          >
+            {snackbarMessage}
+          </Alert>
+        </Snackbar>
       </Box>
     </div>
   );

@@ -25,4 +25,7 @@ export const orderBasketService = {
   async deleteBasketByBasketId(orderBasketId: number): Promise<string> {
     return orderClient.delete(`/orderbasket/delete/${orderBasketId}`);
   },
+   async deleteBasketByUserId(userId: number): Promise<string> {
+    return orderClient.delete(`/orderbasket/deleteuserid/${userId}`);
+  },
 };

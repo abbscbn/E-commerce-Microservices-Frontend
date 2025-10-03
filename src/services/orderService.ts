@@ -2,7 +2,7 @@ import orderClient from "../api/orderClient";
 import type { orderItem, order } from "../types/order";
 
 export const orderService = {
-  async createOrder(userId: number, data: orderItem): Promise<order> {
+  async createOrder(userId: number, data: orderItem[]): Promise<order> {
     return orderClient.post(`/order/save/${userId}`, data);
   },
 

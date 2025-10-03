@@ -83,7 +83,7 @@ function Product_Details() {
       } else {
         // ✅ Zaten sepet var → updateBasket
         const existingItems = basket.items.map((i) => ({ ...i })); // <-- deep copy
-
+        console.log(existingItems);
         const itemIndex = existingItems.findIndex(
           (i) => i.productId === product.id
         );
@@ -106,9 +106,10 @@ function Product_Details() {
         }
 
         const newBasket = {
-          ...basket, // eski basket’in shallow copy’si
+          userId: basket.userId, // eski basket’in shallow copy’si
           items: existingItems,
         };
+        console.log(newBasket);
 
         updatedBasket = await orderBasketService.updateBasket(newBasket);
       }
