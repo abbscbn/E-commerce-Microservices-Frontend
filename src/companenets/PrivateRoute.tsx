@@ -18,6 +18,10 @@ function PrivateRoute({ children, role }: PrivateRouteProps) {
     return <Navigate to="/unauthorized" replace />;
   }
 
+  
+
+
+
   return children;
 }
 

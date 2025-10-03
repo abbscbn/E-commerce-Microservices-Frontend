@@ -133,7 +133,11 @@ function Header() {
                   </Button>
                 </>
               )}
-              <IconButton color="inherit" sx={{ ml: 2 }}>
+              <IconButton
+                color="inherit"
+                sx={{ ml: 2 }}
+                onClick={() => navigate("/basket")}
+              >
                 <Badge badgeContent={total} color="error">
                   <ShoppingCartIcon />
                 </Badge>
@@ -147,7 +151,7 @@ function Header() {
               <IconButton color="inherit" onClick={handleDrawerToggle}>
                 <MenuIcon />
               </IconButton>
-              <IconButton color="inherit">
+              <IconButton onClick={() => navigate("/basket")} color="inherit">
                 <Badge badgeContent={total} color="error">
                   <ShoppingCartIcon />
                 </Badge>

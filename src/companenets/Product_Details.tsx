@@ -73,6 +73,9 @@ function Product_Details() {
               // backend otomatik verecek
               productId: product.id,
               quantity,
+              price: product.price,
+              name: product.name,
+              productImgUrl: product.image?.desktopUrl,
             },
           ],
         };
@@ -96,6 +99,9 @@ function Product_Details() {
           existingItems.push({
             productId: product.id,
             quantity,
+            price: product.price,
+            name: product.name,
+            productImgUrl: product.image?.desktopUrl,
           });
         }
 

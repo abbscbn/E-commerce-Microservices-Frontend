@@ -10,7 +10,7 @@ import AdminLayout from "./admin/AdminLayout";
 import DashboardHome from "../pages/admin/DashboardHome";
 import ProductList from "../pages/admin/ProductList";
 import ProductFormWrapper from "../pages/admin/ProductFormWrapper";
-
+import BasketPage from "./BasketPage";
 function Routers() {
   return (
     <div>
@@ -31,10 +31,10 @@ function Routers() {
           <Route path="products/new" element={<ProductFormWrapper />} />
           <Route path="products/edit/:id" element={<ProductFormWrapper />} />
         </Route>
-
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/product-details" element={<Product_Details_Page />} />
+        <Route path="/basket" element={<BasketPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </div>
