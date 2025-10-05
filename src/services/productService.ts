@@ -41,7 +41,7 @@ export const productService = {
     return productClient.delete(`/delete/${productId}`);
   },
 
-  async getProductByProductId(productId: number): Promise<ResponseProduct> {
+  async getProductByProductId(productId: number | null): Promise<ResponseProduct> {
     return productClient.get(`/get/${productId}`);
   },
 

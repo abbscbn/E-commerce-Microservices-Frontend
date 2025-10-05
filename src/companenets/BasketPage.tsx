@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import {
   Box,
   Typography,
@@ -23,6 +24,7 @@ import { useNavigate } from "react-router-dom";
 import Header from "./Header";
 import { orderBasketService } from "../services/orderBasketService";
 import { orderService } from "../services/orderService";
+import { productService } from "../services/productService";
 
 function BasketPage() {
   const { basket } = useAppSelector((state) => state.basket);
@@ -30,6 +32,8 @@ function BasketPage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [issuccess, setIssucces] = useState(false);
+  const [isfaild, setIsfaild] = useState(false);
+  const [fullMessageArray, setFullMessageArray] = useState<string[]>([]);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState<
@@ -116,17 +120,26 @@ function BasketPage() {
             return;
           }
 
-          if (currentOrder.status === "CANCELLED") {
+          if (currentOrder.status === "FAILED") {
             let reasons = "Sipariş başarısız oldu.";
+            const messageArray: string[] = [];
             if (currentOrder.failedMessages?.length) {
-              reasons = currentOrder.failedMessages
-                .map((fm) => fm.message)
-                .join(", ");
+              for (let i = 0; i < currentOrder.failedMessages?.length; i++) {
+                const product = await productService.getProductByProductId(
+                  currentOrder.failedMessages[i].productId
+                );
+                const productName = product.name;
+                const message = currentOrder.failedMessages[i].message;
+                const fullmessage = productName + " için " + message;
+                messageArray.push(fullmessage);
+              }
+              // reasons = currentOrder.failedMessages
+              //   .map((fm) => fm.message)
+              //   .join(", ");
             }
+            setFullMessageArray(messageArray);
 
-            setSnackbarMessage(reasons);
-            setSnackbarSeverity("error");
-            setSnackbarOpen(true);
+            setIsfaild(true);
             return;
           }
         }
@@ -152,6 +165,70 @@ function BasketPage() {
     (sum, item) => sum + item.price * item.quantity,
     0
   );
+
+  if (isfaild) {
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="100vh"
+        bgcolor="#fff5f5"
+      >
+        <Paper
+          elevation={3}
+          sx={{
+            p: 5,
+            borderRadius: 4,
+            textAlign: "center",
+            maxWidth: 600,
+            bgcolor: "white",
+          }}
+        >
+          <ErrorOutlineIcon sx={{ fontSize: 80, color: "error.main", mb: 2 }} />
+          <Typography variant="h4" gutterBottom color="error.main">
+            Siparişiniz Gerçekleştirilemedi 😔
+          </Typography>
+
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+            Aşağıdaki hatalar nedeniyle siparişiniz tamamlanamadı:
+          </Typography>
+
+          <Box textAlign="left" mb={3}>
+            {fullMessageArray.map((msg, index) => (
+              <Paper
+                key={index}
+                variant="outlined"
+                sx={{
+                  p: 1.5,
+                  mb: 1,
+                  borderColor: "error.light",
+                  bgcolor: "#fff0f0",
+                }}
+              >
+                <Typography variant="body2" color="error.dark">
+                  • {msg}
+                </Typography>
+              </Paper>
+            ))}
+          </Box>
+
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            Lütfen hatalı ürünleri sepetinizden çıkararak tekrar deneyin.
+          </Typography>
+
+          <Button
+            variant="contained"
+            color="error"
+            onClick={() => navigate("/")}
+            sx={{ borderRadius: 2, px: 4 }}
+          >
+            Alışverişe Geri Dön
+          </Button>
+        </Paper>
+      </Box>
+    );
+  }
 
   if (issuccess) {
     return (
