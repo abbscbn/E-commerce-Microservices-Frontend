@@ -11,10 +11,14 @@ export const registerFormSchemas = yup.object().shape({
     .max(300, "email uzunluğu maximum 50 karakter")
     .email("Email formatında olmak zorundadır")
     .required("Email alanı zorunludur"),
-  password: yup.string().required("Şifre alanı zorunludur"),
+  password: yup
+    .string()
+    .min(6, "şifre en az 6 karakterli olmalıdır")
+    .required("Şifre alanı zorunludur"),
   confirmPassword: yup
-  .string()
-  .required("Şifre tekrarı zorunludur")
-  .oneOf([yup.ref("password")], "Şifreler eşleşmiyor"),
+    .string()
+
+    .required("Şifre tekrarı zorunludur")
+    .oneOf([yup.ref("password")], "Şifreler eşleşmiyor"),
   term: yup.boolean().oneOf([true], "Hizmet şartlarını kabul etmelisiniz"),
 });

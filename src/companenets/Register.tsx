@@ -59,9 +59,11 @@ function Register() {
           navigate("/login");
         }, 1500);
       } catch (err: any) {
+        console.log("hata yeri");
+        console.log(err);
         // unwrapResponse sayesinde backend'den gelen hata throw ediliyor
         // burada err zaten ApiError tipinde
-        setErrorMsg(err.message);
+        setErrorMsg(err);
       }
     },
   });

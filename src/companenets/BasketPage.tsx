@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import {
@@ -31,6 +31,7 @@ function BasketPage() {
   const { user } = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+
   const [issuccess, setIssucces] = useState(false);
   const [isfaild, setIsfaild] = useState(false);
   const [fullMessageArray, setFullMessageArray] = useState<string[]>([]);
@@ -87,64 +88,51 @@ function BasketPage() {
         price: i.price,
       }));
 
-      // 1) Sipariş oluştur
       const createdOrder = await orderService.createOrder(user.id, orderItems);
 
       setSnackbarMessage("Siparişiniz işleniyor...");
       setSnackbarSeverity("info");
       setSnackbarOpen(true);
 
-      // 2) Siparişin tamamlanmasını bekle (polling mekanizması)
       const checkOrderStatus = async (orderId: number, retries = 10) => {
         for (let i = 0; i < retries; i++) {
-          await new Promise((res) => setTimeout(res, 3000)); // 3 saniye bekle
+          await new Promise((res) => setTimeout(res, 3000));
           const orders = await orderService.getOrderByUserId(user.id);
 
           const currentOrder = orders.find((o) => o.id === orderId);
-          console.log(currentOrder);
 
           if (!currentOrder) return;
 
           if (currentOrder.status === "CONFIRMED") {
             setSnackbarMessage("Siparişiniz başarıyla tamamlandı 🎉");
-
             setSnackbarSeverity("success");
             setSnackbarOpen(true);
 
             dispatch(clearBasket());
-
             await orderBasketService.deleteBasketByUserId(user.id);
 
             setIssucces(true);
-
             return;
           }
 
           if (currentOrder.status === "FAILED") {
-            let reasons = "Sipariş başarısız oldu.";
             const messageArray: string[] = [];
             if (currentOrder.failedMessages?.length) {
-              for (let i = 0; i < currentOrder.failedMessages?.length; i++) {
+              for (let i = 0; i < currentOrder.failedMessages.length; i++) {
                 const product = await productService.getProductByProductId(
                   currentOrder.failedMessages[i].productId
                 );
                 const productName = product.name;
                 const message = currentOrder.failedMessages[i].message;
-                const fullmessage = productName + " için " + message;
-                messageArray.push(fullmessage);
+                messageArray.push(`${productName} için ${message}`);
               }
-              // reasons = currentOrder.failedMessages
-              //   .map((fm) => fm.message)
-              //   .join(", ");
             }
             setFullMessageArray(messageArray);
-
             setIsfaild(true);
             return;
           }
         }
 
-        // timeout olursa
         setSnackbarMessage(
           "Sipariş durumu doğrulanamadı. Lütfen daha sonra kontrol edin."
         );
@@ -166,6 +154,7 @@ function BasketPage() {
     0
   );
 
+  // ❌ Başarısız sipariş sayfası
   if (isfaild) {
     return (
       <Box
@@ -182,18 +171,15 @@ function BasketPage() {
             borderRadius: 4,
             textAlign: "center",
             maxWidth: 600,
-            bgcolor: "white",
           }}
         >
           <ErrorOutlineIcon sx={{ fontSize: 80, color: "error.main", mb: 2 }} />
           <Typography variant="h4" gutterBottom color="error.main">
             Siparişiniz Gerçekleştirilemedi 😔
           </Typography>
-
           <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
             Aşağıdaki hatalar nedeniyle siparişiniz tamamlanamadı:
           </Typography>
-
           <Box textAlign="left" mb={3}>
             {fullMessageArray.map((msg, index) => (
               <Paper
@@ -212,11 +198,9 @@ function BasketPage() {
               </Paper>
             ))}
           </Box>
-
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
             Lütfen hatalı ürünleri sepetinizden çıkararak tekrar deneyin.
           </Typography>
-
           <Button
             variant="contained"
             color="error"
@@ -230,6 +214,7 @@ function BasketPage() {
     );
   }
 
+  // ✅ Başarılı sipariş sayfası
   if (issuccess) {
     return (
       <Box
@@ -248,9 +233,7 @@ function BasketPage() {
             maxWidth: 500,
           }}
         >
-          <CheckCircleIcon
-            sx={{ fontSize: 80, color: "success.main", mb: 2 }}
-          />
+          <CheckCircleIcon sx={{ fontSize: 80, color: "success.main", mb: 2 }} />
           <Typography variant="h4" gutterBottom color="success.main">
             Siparişiniz Başarılı! 🎉
           </Typography>
@@ -271,6 +254,7 @@ function BasketPage() {
     );
   }
 
+  // 🛒 Sepet sayfası
   return (
     <div>
       <Header />
@@ -282,20 +266,32 @@ function BasketPage() {
         {basket?.items.map((item) => (
           <Card
             key={item.productId}
-            sx={{ display: "flex", alignItems: "center", mb: 2 }}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              mb: 2,
+              p: 1,
+              borderRadius: 2,
+              boxShadow: 2,
+            }}
           >
             <CardMedia
               component="img"
-              sx={{ width: 120 }}
+              sx={{ width: 100, borderRadius: 1 }}
               image={item.productImgUrl || "/placeholder.png"}
               alt={item.name}
             />
+
             <CardContent sx={{ flex: 1 }}>
               <Typography variant="h6">{item.name}</Typography>
               <Typography variant="body2" color="text.secondary">
-                {item.price} ₺ x {item.quantity}
+                Birim Fiyat: {item.price.toFixed(2)} ₺
               </Typography>
-              {/* Miktar arttır/azalt butonları */}
+              <Typography variant="body2" color="text.secondary">
+                Miktar: {item.quantity}
+              </Typography>
+
               <Box mt={1}>
                 <Button
                   size="small"
@@ -321,9 +317,11 @@ function BasketPage() {
                 </Button>
               </Box>
             </CardContent>
+
             <IconButton
               color="error"
               onClick={() => handleRemoveItem(item.productId)}
+              sx={{ ml: 1 }}
             >
               <DeleteIcon />
             </IconButton>
@@ -331,7 +329,7 @@ function BasketPage() {
         ))}
 
         <Box mt={3} textAlign="right">
-          <Typography variant="h6">Toplam: {totalPrice} ₺</Typography>
+          <Typography variant="h6">Toplam: {totalPrice?.toFixed(2)} ₺</Typography>
           <Button
             variant="contained"
             color="success"
@@ -342,7 +340,6 @@ function BasketPage() {
           </Button>
         </Box>
 
-        {/* Snackbar ile kullanıcıya bilgi göster */}
         <Snackbar
           open={snackbarOpen}
           autoHideDuration={4000}
